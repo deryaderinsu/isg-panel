@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>İSG Saha Kontrol Merkezi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#e9e8e4;--card:#f6f5f2;--ink:#1d2327;--mute:#5d6469;--line:#cfcdc6;--yel:#f2c200;--red:#c42b17;--grn:#23794a;--amb:#b87400;--redbg:#f9dcd7;--ambbg:#f8e9c6;--grnbg:#d9eee1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171b1e;--card:#21272b;--ink:#ecebe6;--mute:#a0a7ac;--line:#363e43;--grn:#4cc183;--red:#ff6a56;--amb:#f0a720;--redbg:#4a2520;--ambbg:#46381a;--grnbg:#1d3a2b}}
+:root[data-theme="dark"]{--bg:#171b1e;--card:#21272b;--ink:#ecebe6;--mute:#a0a7ac;--line:#363e43;--grn:#4cc183;--red:#ff6a56;--amb:#f0a720;--redbg:#4a2520;--ambbg:#46381a;--grnbg:#1d3a2b}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 Barlow,system-ui,sans-serif}
+h1,h2,.num,.name,.pill,button{font-family:"Barlow Semi Condensed","Arial Narrow",sans-serif}
+header{background:#f2c200;color:#1d2327;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:6px solid #1d2327}
+h1{margin:0;font-size:24px;font-weight:700;line-height:1.1}
+.sub{font-size:13px}
+.meta{display:flex;gap:16px;align-items:center;font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;font-size:15px}
+.dot{width:10px;height:10px;border-radius:50%;background:#1d2327;display:inline-block;margin-right:6px;animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+main{max-width:1200px;margin:0 auto;padding:20px;display:grid;gap:20px;grid-template-columns:minmax(0,1fr) 330px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.banner{grid-column:1/-1;padding:12px 16px;font:600 18px "Barlow Semi Condensed",sans-serif;border-left:8px solid var(--grn);background:var(--grnbg)}
+.banner.bad{border-left-color:var(--red);background:var(--redbg)}
+.sum{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:600px){.sum{grid-template-columns:repeat(2,1fr)}}
+.s{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--ink);padding:10px 14px}
+.s .num{font-size:32px;font-weight:700;line-height:1.1}
+.s span{color:var(--mute);font-size:13px}
+h2{font-size:18px;margin:0 0 10px;font-weight:600;display:flex;align-items:center;gap:8px}
+.workers{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.w{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--grn);padding:10px 12px;display:block}
+.w:focus-visible,.alerts li:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.w.sel{box-shadow:0 0 0 2px var(--ink)}
+.w.warn{border-left-color:var(--amb)}.w.crit{border-left-color:var(--red)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.name{font-size:18px;font-weight:600;line-height:1.2}
+.role{color:var(--mute);font-size:13px}
+.pill{font-size:13px;font-weight:600;padding:1px 8px;background:var(--grnbg);color:var(--grn);white-space:nowrap}
+.warn .pill{background:var(--ambbg);color:var(--amb)}.crit .pill{background:var(--redbg);color:var(--red)}
+.row{display:flex;justify-content:space-between;font-size:13px;margin-top:4px}
+.bar{height:6px;background:var(--line);margin-top:4px}.bar i{display:block;height:100%;background:var(--grn)}
+.panel{background:var(--card);border:1px solid var(--line);padding:14px;margin-top:20px}
+aside .panel{margin-top:0}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+@media (max-width:600px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.t{background:var(--bg);padding:8px 10px}.t b{font:600 22px "Barlow Semi Condensed",sans-serif;display:block}.t span{font-size:12px;color:var(--mute)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.charts{grid-template-columns:1fr}}
+canvas{width:100%;height:150px;display:block}
+.cap{font-size:13px;color:var(--mute);margin-bottom:4px}
+.alerts{list-style:none;margin:0;padding:0;max-height:480px;overflow:auto}
+.alerts li{border-left:5px solid var(--amb);padding:6px 10px;margin-bottom:8px;background:var(--bg);font-size:14px;cursor:pointer}
+.alerts li.crit{border-left-color:var(--red)}
+.alerts li.empty{cursor:default;color:var(--mute);border-left-color:var(--line)}
+.alerts time{display:block;color:var(--mute);font-size:12px}
+.cnt{background:var(--ink);color:var(--bg);font-size:13px;padding:0 8px;min-width:24px;text-align:center}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button.act{font-weight:600;font-size:14px;background:var(--ink);color:var(--bg);border:0;padding:8px 14px;cursor:pointer}
+button.act.alt{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+button.act:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+footer{grid-column:1/-1;color:var(--mute);font-size:13px;border-top:1px solid var(--line);padding-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>İSG Saha Kontrol Merkezi</h1><div class="sub">Baret ve yelek sensörlerinden canlı veri</div></div>
+  <div class="meta"><span><span class="dot"></span>Demo verisi</span><span id="clock"></span></div>
+</header>
+<main>
+  <div class="banner" id="banner" role="status" aria-live="polite"></div>
+  <section class="sum" aria-label="Genel durum">
+    <div class="s"><div class="num" id="sOn">0</div><span>Sahada çalışan</span></div>
+    <div class="s"><div class="num" id="sOk">0</div><span>Normal durumda</span></div>
+    <div class="s"><div class="num" id="sBad">0</div><span>Uyarı veren</span></div>
+    <div class="s"><div class="num" id="sLow">0</div><span>Pili %20 altında</span></div>
+  </section>
+
+  <section>
+    <h2>Çalışanlar</h2>
+    <div class="workers" id="workers"></div>
+    <div class="panel">
+      <h2 id="selName">Çalışan seçin</h2>
+      <div class="tiles">
+        <div class="t"><b id="tGas">-</b><span>Gaz (ppm)</span></div>
+        <div class="t"><b id="tAcc">-</b><span>İvme (g)</span></div>
+        <div class="t"><b id="tBat">-</b><span>Pil</span></div>
+        <div class="t"><b id="tSig">-</b><span>Sinyal</span></div>
+      </div>
+      <div class="charts">
+        <div><div class="cap">Gaz seviyesi (ppm), kesikli çizgi eşik değeri 50</div><canvas id="cGas" role="img" aria-label="Gaz seviyesi grafiği"></canvas></div>
+        <div><div class="cap">Darbe ivmesi (g), kesikli çizgi eşik değeri 3</div><canvas id="cAcc" role="img" aria-label="Darbe ivmesi grafiği"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="panel">
+      <h2>Uyarılar <span class="cnt" id="cnt">0</span></h2>
+      <ul class="alerts" id="alerts"></ul>
+      <div class="btns">
+        <button class="act" id="csv">Raporu indir (CSV)</button>
+        <button class="act alt" id="clear">Temizle</button>
+      </div>
+    </div>
+  </aside>
+  <footer>Veriler her 1,5 saniyede güncellenir. Uyarı eşikleri: gaz 50 ppm, darbe 3 g. Bu ekran demo verisiyle çalışmaktadır.</footer>
+</main>
+<script>
+const GAS=50,ACC=3,N=40;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const stamp=()=>{const d=new Date();return pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())};
+const W=[["Ahmet Yılmaz","Kaynakçı"],["Mehmet Kaya","Kazı operatörü"],["Ayşe Demir","Saha mühendisi"],["Mustafa Çelik","Kalıpçı"],["Zeynep Aksoy","Elektrikçi"],["Hasan Öz","Vinç operatörü"]]
+.map((p,i)=>({id:i,name:p[0],role:p[1],gas:8+Math.random()*10,acc:1,bat:50+Math.random()*50,sig:2+Math.floor(Math.random()*3),hg:[],ha:[],st:"ok",cd:0}));
+let sel=0,log=[];
+const LAB={ok:"Normal",warn:"Dikkat",crit:"Tehlike"};
+
+/* kartları bir kez oluştur, sonra yerinde güncelle (klavye odağı kaybolmasın) */
+W.forEach(w=>{
+  const b=document.createElement("button");b.type="button";b.className="w";
+  b.innerHTML='<div class="top"><div><div class="name"></div><div class="role"></div></div><span class="pill"></span></div><div class="row"><span class="g"></span><span class="s"></span></div><div class="row"><span class="b"></span></div><div class="bar"><i></i></div>';
+  b.querySelector(".name").textContent=w.name;b.querySelector(".role").textContent=w.role;
+  b.onclick=()=>{sel=w.id;render()};
+  $("workers").appendChild(b);w.el=b;
+});
+
+function addAlert(w,msg,crit){
+  log.unshift({t:stamp(),id:w.id,name:w.name,role:w.role,msg,crit});
+  if(log.length>100)log.pop();
+  renderAlerts();
+}
+function renderAlerts(){
+  const ul=$("alerts");ul.textContent="";$("cnt").textContent=log.length;
+  if(!log.length){const li=document.createElement("li");li.className="empty";li.textContent="Henüz uyarı yok. Gaz veya darbe eşiği aşılınca burada görünür.";ul.appendChild(li);return}
+  log.forEach(a=>{
+    const li=document.createElement("li");li.tabIndex=0;if(a.crit)li.className="crit";
+    const b=document.createElement("b");b.textContent=a.name;
+    const t=document.createElement("time");t.textContent=a.t;
+    li.append(b,document.createTextNode(": "+a.msg),t);
+    const go=()=>{sel=a.id;render()};
+    li.onclick=go;li.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
+    ul.appendChild(li);
+  });
+}
+function tick(){
+  W.forEach(w=>{
+    w.gas=Math.max(4,w.gas+(Math.random()-.5)*4+(w.gas>20?-1:0));
+    w.acc=1+Math.random()*.4;
+    w.bat=Math.max(0,w.bat-.08);
+    if(Math.random()<.05)w.sig=Math.min(4,Math.max(1,w.sig+(Math.random()<.5?-1:1)));
+    if(w.cd>0)w.cd--;
+    if(w.cd===0&&Math.random()<.025)w.gas=GAS+10+Math.random()*25;
+    if(w.cd===0&&Math.random()<.02)w.acc=ACC+Math.random()*3;
+    let st="ok";
+    if(w.gas>GAS*.7)st="warn";
+    if(w.gas>GAS||w.acc>ACC)st="crit";
+    if(st==="crit"&&w.cd===0){
+      if(w.gas>GAS)addAlert(w,"Gaz seviyesi "+w.gas.toFixed(0)+" ppm. Alanı boşaltın.",true);
+      if(w.acc>ACC)addAlert(w,"Sert darbe veya düşme algılandı ("+w.acc.toFixed(1)+" g).",true);
+      w.cd=8;
+    }
+    if(st==="ok"&&w.bat<20&&w.cd===0&&!w.lowWarned){w.lowWarned=true;addAlert(w,"Pil seviyesi %"+w.bat.toFixed(0)+". Şarj gerekli.",false)}
+    w.st=st;
+    w.hg.push(w.gas);w.ha.push(w.acc);
+    if(w.hg.length>N){w.hg.shift();w.ha.shift()}
+  });
+  render();
+}
+function render(){
+  W.forEach(w=>{
+    const e=w.el;
+    e.className="w "+(w.st==="warn"?"warn":w.st==="crit"?"crit":"")+(w.id===sel?" sel":"");
+    e.setAttribute("aria-pressed",w.id===sel);
+    e.querySelector(".pill").textContent=LAB[w.st];
+    e.querySelector(".g").textContent="Gaz "+w.gas.toFixed(0)+" ppm";
+    e.querySelector(".s").textContent="Sinyal "+w.sig+"/4";
+    e.querySelector(".b").textContent="Pil %"+w.bat.toFixed(0);
+    const i=e.querySelector(".bar i");i.style.width=w.bat+"%";i.style.background=w.bat<20?"var(--red)":"var(--grn)";
+  });
+  const bad=W.filter(w=>w.st==="crit").length,warn=W.filter(w=>w.st==="warn").length;
+  const bn=$("banner");
+  bn.className="banner"+(bad?" bad":"");
+  bn.textContent=bad?bad+" çalışanda tehlike var. Uyarıları kontrol edin.":warn?"Saha durumu normal, "+warn+" çalışanda dikkat gerekiyor.":"Saha durumu normal. Tüm çalışanlar güvende.";
+  $("sOn").textContent=W.length;
+  $("sOk").textContent=W.filter(w=>w.st==="ok").length;
+  $("sBad").textContent=bad+warn;
+  $("sLow").textContent=W.filter(w=>w.bat<20).length;
+  const s=W[sel];
+  $("selName").textContent=s.name+" ("+s.role+")";
+  $("tGas").textContent=s.gas.toFixed(0);$("tAcc").textContent=s.acc.toFixed(1);
+  $("tBat").textContent="%"+s.bat.toFixed(0);$("tSig").textContent=s.sig+"/4";
+  draw($("cGas"),s.hg,GAS,70);draw($("cAcc"),s.ha,ACC,6);
+  $("clock").textContent="Son güncelleme "+stamp();
+}
+function draw(c,d,th,max){
+  const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;
+  c.width=w*dpr;c.height=h*dpr;
+  const x=c.getContext("2d");x.scale(dpr,dpr);
+  const cs=getComputedStyle(document.documentElement);
+  const ink=cs.getPropertyValue("--ink").trim(),line=cs.getPropertyValue("--line").trim(),red=cs.getPropertyValue("--red").trim();
+  const Y=v=>h-4-(Math.min(v,max)/max)*(h-8);
+  x.strokeStyle=line;x.lineWidth=1;x.strokeRect(.5,.5,w-1,h-1);
+  x.strokeStyle=red;x.setLineDash([5,4]);x.beginPath();x.moveTo(0,Y(th));x.lineTo(w,Y(th));x.stroke();x.setLineDash([]);
+  if(d.length<2)return;
+  x.strokeStyle=ink;x.lineWidth=2;x.beginPath();
+  d.forEach((v,i)=>{const px=i/(N-1)*w;i?x.lineTo(px,Y(v)):x.moveTo(px,Y(v))});x.stroke();
+}
+$("clear").onclick=()=>{log=[];renderAlerts()};
+$("csv").onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[["Saat","Çalışan","Görev","Seviye","Açıklama"]].concat(log.map(a=>[a.t,a.name,a.role,a.crit?"Tehlike":"Bilgi",a.msg]));
+  const csv="\ufeff"+rows.map(r=>r.map(q).join(";")).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="isg-uyari-raporu.csv";a.click();
+};
+renderAlerts();
+for(let i=0;i<N;i++)tick();
+setInterval(tick,1500);
+addEventListener("resize",render);
+</script>
+</body>
+</html>
